@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disponibilidad Semanal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .add-person-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .add-person-section:focus-within {
+            border-color: #667eea;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+        }
+
+        .add-person-form {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .add-person-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            min-width: 120px;
+        }
+
+        .add-person-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            background: #f8f9ff;
+            color: #495057;
+            transition: all 0.3s ease;
+        }
+
+        .add-person-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            background: white;
+        }
+
+        .add-person-input::placeholder {
+            color: #adb5bd;
+            font-weight: 400;
+        }
+
+        .add-person-btn {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .add-person-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .add-person-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .people-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .person-tab {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .person-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .person-tab:hover:not(.active) {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .remove-person {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .remove-person:hover {
+            background: #ff5252;
+        }
+
+        .current-person-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .week-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .day-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .day-card:hover {
+            transform: translateY(-3px);
+            border-color: #667eea;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .day-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .day-name {
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .day-date {
+            color: #666;
+            font-size: 1em;
+            font-weight: 500;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .time-slots {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .time-slot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9ff;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .time-slot:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.1);
+        }
+
+        .time-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .time-input {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            background: white;
+            color: #495057;
+            transition: all 0.3s ease;
+            min-width: 130px;
+            text-align: center;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.15);
+            background: #fff;
+        }
+
+        .time-separator {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 16px;
+        }
+
+        .remove-slot {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            min-width: 90px;
+            white-space: nowrap;
+        }
+
+        .remove-slot:hover {
+            background: #ff5252;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        }
+
+        .add-slot {
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: fit-content;
+        }
+
+        .add-slot:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .summary-section {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+
+        .summary-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .summary-content {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            white-space: pre-line;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            border-left: 4px solid #667eea;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .export-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+        }
+
+        .no-people {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 20px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .add-person-form {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+            
+            .add-person-label {
+                min-width: auto;
+            }
+            
+            .people-tabs {
+                justify-content: center;
+            }
+            
+            .day-card {
+                padding: 20px;
+            }
+            
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .day-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .time-slot {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .time-group {
+                justify-content: center;
+            }
+            
+            .add-slot {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 Disponibilidad Semanal</h1>
+        
+        <div class="add-person-section">
+            <div class="add-person-form">
+                <label class="add-person-label">👤 Agregar persona:</label>
+                <input type="text" id="newPersonName" class="add-person-input" 
+                       placeholder="Nombre completo de la persona">
+                <button class="add-person-btn" onclick="addPerson()">➕ Agregar</button>
+            </div>
+        </div>
+
+        <div class="people-tabs" id="peopleTabs">
+            <div class="no-people">Agregue una persona para comenzar</div>
+        </div>
+
+        <div id="scheduleSection" style="display: none;">
+            <div class="current-person-header" id="currentPersonHeader">
+                📋 Disponibilidad de: 
+            </div>
+            
+            <div class="week-container" id="weekContainer">
+                <!-- Los días se generarán dinámicamente aquí -->
+            </div>
+        </div>
+
+        <div class="summary-section">
+            <h3 class="summary-title">📋 Resumen General</h3>
+            <div class="summary-content" id="summaryContent">
+                Agregue personas y horarios para ver el resumen aquí...
+            </div>
+            <button class="export-btn" onclick="exportData()">📤 Exportar Todas las Disponibilidades</button>
+        </div>
+    </div>
+
+    <script>
+        const days = [
+            { name: 'Lunes', short: 'Lun' },
+            { name: 'Martes', short: 'Mar' },
+            { name: 'Miércoles', short: 'Mié' },
+            { name: 'Jueves', short: 'Jue' },
+            { name: 'Viernes', short: 'Vie' },
+            { name: 'Sábado', short: 'Sáb' },
+            { name: 'Domingo', short: 'Dom' }
+        ];
+
+        let people = {};
+        let currentPerson = null;
+
+        function addPerson() {
+            const nameInput = document.getElementById('newPersonName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Por favor, ingrese un nombre');
+                nameInput.focus();
+                return;
+            }
+            
+            if (people[name]) {
+                alert('Esta persona ya existe');
+                nameInput.focus();
+                return;
+            }
+            
+            // Inicializar disponibilidad para la nueva persona
+            people[name] = {};
+            days.forEach((day, index) => {
+                people[name][index] = [];
+            });
+            
+            nameInput.value = '';
+            renderPeopleTabs();
+            selectPerson(name);
+            updateSummary();
+        }
+
+        function removePerson(name) {
+            if (confirm(`¿Está seguro de eliminar a ${name} y toda su disponibilidad?`)) {
+                delete people[name];
+                
+                if (currentPerson === name) {
+                    const remainingPeople = Object.keys(people);
+                    currentPerson = remainingPeople.length > 0 ? remainingPeople[0] : null;
+                }
+                
+                renderPeopleTabs();
+                if (currentPerson) {
+                    selectPerson(currentPerson);
+                } else {
+                    document.getElementById('scheduleSection').style.display = 'none';
+                }
+                updateSummary();
+            }
+        }
+
+        function selectPerson(name) {
+            currentPerson = name;
+            document.getElementById('scheduleSection').style.display = 'block';
+            document.getElementById('currentPersonHeader').textContent = `📋 Disponibilidad de: ${name}`;
+            
+            renderPeopleTabs();
+            renderSchedule();
+        }
+
+        function renderPeopleTabs() {
+            const tabsContainer = document.getElementById('peopleTabs');
+            const peopleNames = Object.keys(people);
+            
+            if (peopleNames.length === 0) {
+                tabsContainer.innerHTML = '<div class="no-people">Agregue una persona para comenzar</div>';
+                return;
+            }
+            
+            tabsContainer.innerHTML = peopleNames.map(name => `
+                <div class="person-tab ${name === currentPerson ? 'active' : ''}" 
+                     onclick="selectPerson('${name}')">
+                    ${name}
+                    <button class="remove-person" onclick="event.stopPropagation(); removePerson('${name}')" 
+                            title="Eliminar persona">×</button>
+                </div>
+            `).join('');
+        }
+
+        function renderSchedule() {
+            if (!currentPerson) return;
+            
+            const weekContainer = document.getElementById('weekContainer');
+            weekContainer.innerHTML = days.map((day, index) => createDayCard(day, index)).join('');
+            
+            // Renderizar horarios existentes para cada día
+            days.forEach((day, dayIndex) => {
+                renderDay(dayIndex);
+            });
+        }
+
+        function createDayCard(day, dayIndex) {
+            return `
+                <div class="day-card">
+                    <div class="day-header">
+                        <div class="day-info">
+                            <div class="day-name">${day.name}</div>
+                            <div class="day-date">${day.short}</div>
+                        </div>
+                    </div>
+                    <div class="time-slots" id="slots-${dayIndex}">
+                        <!-- Los slots de tiempo se agregarán aquí -->
+                    </div>
+                    <button class="add-slot" onclick="addTimeSlot(${dayIndex})">
+                        ➕ Agregar Horario
+                    </button>
+                </div>
+            `;
+        }
+
+        function addTimeSlot(dayIndex, fromTime = '08:00', toTime = '14:00') {
+            if (!currentPerson) return;
+            
+            people[currentPerson][dayIndex].push({ from: fromTime, to: toTime });
+            renderDay(dayIndex);
+            updateSummary();
+        }
+
+        function removeTimeSlot(dayIndex, slotIndex) {
+            if (!currentPerson) return;
+            
+            people[currentPerson][dayIndex].splice(slotIndex, 1);
+            renderDay(dayIndex);
+            updateSummary();
+        }
+
+        function updateTime(dayIndex, slotIndex, type, value) {
+            if (!currentPerson || !people[currentPerson][dayIndex][slotIndex]) return;
+            
+            people[currentPerson][dayIndex][slotIndex][type] = value;
+            updateSummary();
+        }
+
+        function renderDay(dayIndex) {
+            if (!currentPerson) return;
+            
+            const slotsContainer = document.getElementById(`slots-${dayIndex}`);
+            slotsContainer.innerHTML = '';
+            
+            people[currentPerson][dayIndex].forEach((slot, slotIndex) => {
+                const slotDiv = document.createElement('div');
+                slotDiv.className = 'time-slot';
+                slotDiv.innerHTML = `
+                    <div class="time-group">
+                        <input type="time" class="time-input" value="${slot.from}" 
+                               onchange="updateTime(${dayIndex}, ${slotIndex}, 'from', this.value)">
+                        <span class="time-separator">a</span>
+                        <input type="time" class="time-input" value="${slot.to}" 
+                               onchange="updateTime(${dayIndex}, ${slotIndex}, 'to', this.value)">
+                    </div>
+                    <button class="remove-slot" onclick="removeTimeSlot(${dayIndex}, ${slotIndex})">
+                        🗑️ Eliminar
+                    </button>
+                `;
+                slotsContainer.appendChild(slotDiv);
+            });
+        }
+
+        function formatTime(time) {
+            const [hours, minutes] = time.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+            return `${displayHour.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+        }
+
+        function updateSummary() {
+            const summaryContent = document.getElementById('summaryContent');
+            let summary = '';
+            
+            const peopleNames = Object.keys(people);
+            if (peopleNames.length === 0) {
+                summaryContent.textContent = 'Agregue personas y horarios para ver el resumen aquí...';
+                return;
+            }
+            
+            peopleNames.forEach(personName => {
+                let hasSchedules = false;
+                
+                days.forEach((day, dayIndex) => {
+                    if (people[personName][dayIndex].length > 0) {
+                        hasSchedules = true;
+                    }
+                });
+                
+                if (hasSchedules) {
+                    summary += `${personName.toUpperCase()}\n`;
+                    summary += `${'='.repeat(personName.length + 10)}\n`;
+                    
+                    days.forEach((day, dayIndex) => {
+                        if (people[personName][dayIndex].length > 0) {
+                            summary += `${day.name}:\n`;
+                            people[personName][dayIndex].forEach(slot => {
+                                const fromFormatted = formatTime(slot.from);
+                                const toFormatted = formatTime(slot.to);
+                                summary += `  • De ${fromFormatted} a ${toFormatted}\n`;
+                            });
+                            summary += '\n';
+                        }
+                    });
+                    summary += '\n';
+                }
+            });
+            
+            summaryContent.textContent = summary || 'Agregue personas y horarios para ver el resumen aquí...';
+        }
+
+        function exportData() {
+            const peopleNames = Object.keys(people);
+            if (peopleNames.length === 0) {
+                alert('Por favor, agregue al menos una persona antes de exportar.');
+                return;
+            }
+            
+            const data = {
+                fecha_exportacion: new Date().toLocaleDateString('es-ES'),
+                hora_exportacion: new Date().toLocaleTimeString('es-ES'),
+                total_personas: peopleNames.length,
+                personas: {}
+            };
+            
+            peopleNames.forEach(personName => {
+                const personData = {
+                    nombre: personName,
+                    disponibilidad: {}
+                };
+                
+                days.forEach((day, dayIndex) => {
+                    if (people[personName][dayIndex].length > 0) {
+                        personData.disponibilidad[day.name] = people[personName][dayIndex].map(slot => ({
+                            desde: slot.from,
+                            hasta: slot.to,
+                            desde_formateado: formatTime(slot.from),
+                            hasta_formateado: formatTime(slot.to)
+                        }));
+                    }
+                });
+                
+                data.personas[personName] = personData;
+            });
+            
+            const jsonData = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `disponibilidades_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`¡Disponibilidades de ${peopleNames.length} persona(s) exportadas exitosamente!`);
+        }
+
+        // Manejar Enter en el campo de agregar persona
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('newPersonName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addPerson();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
